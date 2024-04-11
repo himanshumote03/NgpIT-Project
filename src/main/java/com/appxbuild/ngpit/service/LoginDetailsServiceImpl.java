@@ -48,17 +48,7 @@ public class LoginDetailsServiceImpl implements LoginDetailsService {
     }
 
     @Override
-    public String authentication(LoginDetails loginDetails) {
-        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-        Optional<LoginDetails> res = loginDetailsDao.findById(loginDetails.getId());
-        if (res.isPresent()) {
-            LoginDetails newLoginDetails = res.get();
-            if (bcrypt.matches(loginDetails.getPassword(), loginDetails.getPassword())) {
-                return "Authenticate user";
-            } else {
-                return "Incorrect Password";
-            }
-        }
-        throw new RuntimeException("No use is found for this email!!");
+    public LoginDetails findByEmail(String email) {
+        return loginDetailsDao.findByEmail(email);
     }
 }

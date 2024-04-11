@@ -9,5 +9,6 @@ public interface LoginDetailsService {
     LoginDetails findById(int theId);
     LoginDetails save(LoginDetails loginDetails);
     void deleteById(int theId);
-    String authentication(LoginDetails loginDetails);
+
+    LoginDetails findByEmail(String email);
 }

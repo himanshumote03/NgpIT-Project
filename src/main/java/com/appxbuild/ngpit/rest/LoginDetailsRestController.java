@@ -1,8 +1,11 @@
 package com.appxbuild.ngpit.rest;
 
 import com.appxbuild.ngpit.entity.LoginDetails;
+import com.appxbuild.ngpit.security.AESEncryption;
 import com.appxbuild.ngpit.service.LoginDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,10 +40,12 @@ public class LoginDetailsRestController {
     }
 
 
-    @PostMapping("/loginDetails")
+    @PostMapping("/signup")
     public LoginDetails addLoginDetails(@RequestBody LoginDetails loginDetails) {
-        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-        String encryptedPwd = bcrypt.encode(loginDetails.getPassword());
+
+        // Encryption
+        String encryptedPwd = AESEncryption.encrypt(loginDetails.getPassword());
+//        System.out.println("Encrypted Password : " + encryptedPwd);
         loginDetails.setId(0);
         LocalDateTime dt = LocalDateTime.now();
         loginDetails.setCreated(dt);
@@ -52,16 +57,6 @@ public class LoginDetailsRestController {
     }
 
 
-//    @PutMapping("/loginDetails")
-//    public LoginDetails updateLoginDetails(@RequestBody LoginDetails theLoginDetails){
-//        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-//        String encryptedPwd = bcrypt.encode(theLoginDetails.getPassword());
-//        LocalDateTime dt = LocalDateTime.now();
-//        theLoginDetails.setModified(dt);
-//        theLoginDetails.setPassword(encryptedPwd);
-//        LoginDetails newLoginDetails = loginDetailsService.save(theLoginDetails);
-//        return newLoginDetails;
-//    }
 
     @PutMapping("/loginDetails")
     public LoginDetails updateLoginDetails(@RequestBody LoginDetails theLoginDetails){
@@ -77,8 +72,7 @@ public class LoginDetailsRestController {
         theLoginDetails.setCreated(existingLoginDetails.getCreated());
 
         // Encrypt the password
-        BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
-        String encryptedPwd = bcrypt.encode(theLoginDetails.getPassword());
+        String encryptedPwd = AESEncryption.encrypt(theLoginDetails.getPassword());
 
         // Set the modified field and password
         LocalDateTime dt = LocalDateTime.now();
@@ -99,6 +93,21 @@ public class LoginDetailsRestController {
             throw new RuntimeException("Login Detail id is not found " + id);
         }
         return "Deleted Login Detail Id " + id;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginDetails loginDetails) {
+        LoginDetails user = loginDetailsService.findByEmail(loginDetails.getEmail());
+        System.out.println("\n Existing details: " + user.getEmail() + " : " + user.getPassword());
+        System.out.println("\n email: " + loginDetails.getEmail() + "\n pass:  " + loginDetails.getPassword());
+        if (user != null) {
+            String decryptedPwd = AESEncryption.decrypt(user.getPassword());
+            System.out.println("Decrypted Pass: " + decryptedPwd);
+            if (decryptedPwd.equals(loginDetails.getPassword())) {
+                return ResponseEntity.ok("Login successful.");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid email or password.");
     }
 
 }
