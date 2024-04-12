@@ -98,11 +98,11 @@ public class LoginDetailsRestController {
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDetails loginDetails) {
         LoginDetails user = loginDetailsService.findByEmail(loginDetails.getEmail());
-        System.out.println("\n Existing details: " + user.getEmail() + " : " + user.getPassword());
-        System.out.println("\n email: " + loginDetails.getEmail() + "\n pass:  " + loginDetails.getPassword());
+//        System.out.println("\n Existing details: " + user.getEmail() + " : " + user.getPassword());
+//        System.out.println("\n email: " + loginDetails.getEmail() + "\n pass:  " + loginDetails.getPassword());
         if (user != null) {
             String decryptedPwd = AESEncryption.decrypt(user.getPassword());
-            System.out.println("Decrypted Pass: " + decryptedPwd);
+//            System.out.println("Decrypted Pass: " + decryptedPwd);
             if (decryptedPwd.equals(loginDetails.getPassword())) {
                 return ResponseEntity.ok("Login successful.");
             }
